@@ -1,7 +1,7 @@
-# Create a self-contained HTML "Google-style personal homepage" with editable columns and shortcuts.
-# Save to /mnt/data/MyCustomGoogleHome.htm
+# Create the updated HTML with "first visit auto-edit mode" enabled
+# Save to /mnt/data/MyCustomGoogleHome_v2.htm
 
-html_content = r"""<!DOCTYPE html>
+html = r"""<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8" />
@@ -113,6 +113,11 @@ html_content = r"""<!DOCTYPE html>
     .handle{font-size:16px; opacity:.6; cursor:grab; padding:2px 6px; border:1px dashed var(--line); border-radius:6px}
     .hidden{display:none !important}
     .pill{padding:4px 8px; border:1px solid var(--line); border-radius:999px; color:var(--muted); font-size:12px}
+    .banner{
+      margin: 8px 0 -8px 0; padding:10px 12px; border:1px dashed #2a416e; border-radius:10px; color:#9fb6e6; font-size:13px;
+      display:none;
+    }
+    .banner.show{display:block}
     @media (max-width:640px){
       .g-logo{font-size:32px}
       form.search input[type="text"]{font-size:16px}
@@ -150,6 +155,7 @@ html_content = r"""<!DOCTYPE html>
         <span class="kbd">/</span>
       </form>
       <div class="ghost-tip">提示：按 <span class="kbd">/</span> 可快速聚焦搜尋列</div>
+      <div id="firstVisitBanner" class="banner">第一次使用已為你開啟「編輯模式」，點「＋ 新增欄位 / 新增網站」開始配置吧！</div>
     </section>
 
     <section class="grid" id="grid" aria-live="polite" aria-label="分欄捷徑區"></section>
@@ -201,6 +207,7 @@ html_content = r"""<!DOCTYPE html>
     const importBtn = document.getElementById('importBtn');
     const resetBtn = document.getElementById('resetBtn');
     const yearEl = document.getElementById('year'); yearEl.textContent = new Date().getFullYear();
+    const firstBanner = document.getElementById('firstVisitBanner');
 
     const $ = (sel, root=document) => root.querySelector(sel);
     const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
@@ -396,9 +403,7 @@ html_content = r"""<!DOCTYPE html>
         }
       }
       return closest;
-太簡陋，我想製作一個類似這樣的，但是不要黑色背景 
-
-   }
+    }
 
     // Keyboard focus for search
     document.addEventListener('keydown', (e)=>{
@@ -456,6 +461,8 @@ html_content = r"""<!DOCTYPE html>
       if(confirm('確定要重置？這會清除所有欄位與捷徑。')){
         localStorage.removeItem(KEY);
         render(defaultState());
+        // 重置後自動進入編輯
+        toggle.checked = true; toggle.dispatchEvent(new Event('change'));
       }
     });
 
@@ -499,13 +506,21 @@ html_content = r"""<!DOCTYPE html>
       });
     }
 
-    // boot
-    const initial = load() || defaultState();
+    // boot — first visit auto-enable edit mode
+    const loaded = load();
+    const firstVisit = !loaded;
+    const initial = loaded || defaultState();
     render(initial);
+    if(firstVisit){
+      toggle.checked = true;
+      toggle.dispatchEvent(new Event('change'));
+      firstBanner?.classList.add('show');
+    }
   </script>
 </body>
 </html>
 """
-with open("/mnt/data/MyCustomGoogleHome.htm", "w", encoding="utf-8") as f:
-    f.write(html_content)
-"/mnt/data/MyCustomGoogleHome.htm"
+with open("/mnt/data/MyCustomGoogleHome_v2.htm", "w", encoding="utf-8") as f:
+    f.write(html)
+
+"/mnt/data/MyCustomGoogleHome_v2.htm"
