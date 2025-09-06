@@ -1,0 +1,511 @@
+# Create a self-contained HTML "Google-style personal homepage" with editable columns and shortcuts.
+# Save to /mnt/data/MyCustomGoogleHome.htm
+
+html_content = r"""<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>我的 Google 首頁｜可分欄捷徑</title>
+  <meta name="color-scheme" content="light dark">
+  <style>
+    :root{
+      --bg: #0b1220;
+      --card: #101827;
+      --muted: #93a4bb;
+      --fg: #e8eef7;
+      --line:#22304a;
+      --accent:#3b82f6;
+      --accent-2:#60a5fa;
+      --danger:#ef4444;
+      --ok:#22c55e;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 50% -200px, #1b2a4b 0%, var(--bg) 55%);
+      color: var(--fg);
+      display:flex;
+      flex-direction:column;
+    }
+    a{color:inherit; text-decoration:none}
+    header{
+      padding:16px clamp(12px, 3vw, 28px);
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      border-bottom:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0));
+      position:sticky; top:0; backdrop-filter: blur(6px);
+      z-index:5;
+    }
+    .left, .right{display:flex; gap:10px; align-items:center}
+    .logo{font-weight:800; letter-spacing: .5px}
+    .logo b{color:var(--accent)}
+    .btn{
+      border:1px solid var(--line); background:#0e1729; color:var(--fg);
+      padding:8px 12px; border-radius:10px; cursor:pointer; font-size:14px;
+    }
+    .btn:hover{border-color:#2d3d60}
+    .btn.ghost{background:transparent}
+    .btn.good{border-color: #194a2f; background:#0f2b1d}
+    .btn.danger{border-color:#522222; background:#2a0f11}
+    .switch{display:inline-flex; align-items:center; gap:8px; user-select:none}
+    .switch input{appearance:none; width:44px; height:24px; background:#142036; border:1px solid var(--line); border-radius:999px; position:relative; outline:none; cursor:pointer}
+    .switch input:checked{background:#17315f; border-color:#2d4f92}
+    .switch input::after{content:""; position:absolute; width:18px; height:18px; border-radius:50%; left:3px; top:2px; background:#dfe9fb; transition:all .18s}
+    .switch input:checked::after{left:22px; background:#9cc0ff}
+    main{padding: max(2vh,16px) clamp(12px, 4vw, 48px); display:flex; flex-direction:column; gap:18px}
+    .search-wrap{display:flex; flex-direction:column; align-items:center; margin:6vh auto 2vh auto; width:min(900px, 96%); gap:14px}
+    .g-logo{font-size:42px; font-weight:900; letter-spacing:.6px}
+    .g-logo span:nth-child(1){color:#4285F4}
+    .g-logo span:nth-child(2){color:#EA4335}
+    .g-logo span:nth-child(3){color:#FBBC05}
+    .g-logo span:nth-child(4){color:#4285F4}
+    .g-logo span:nth-child(5){color:#34A853}
+    .g-logo span:nth-child(6){color:#EA4335}
+    form.search{
+      display:flex; align-items:center; gap:10px; width:100%;
+      background: #0b1426; border:1px solid var(--line); border-radius:999px;
+      padding:10px 14px;
+      box-shadow: 0 0 0 3px rgba(59,130,246,.08) inset;
+    }
+    form.search input[type="text"]{
+      flex:1; font-size:18px; padding:10px 8px; background:transparent; border:0; outline:none; color:var(--fg);
+    }
+    .kbd{font: 12px/1.2 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+         border:1px solid var(--line); padding:2px 6px; border-radius:6px; color:var(--muted)}
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap:16px;
+      align-items:start;
+    }
+    .col{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
+      border:1px solid var(--line); border-radius:14px; padding:12px; position:relative;
+    }
+    .col.drag-over{outline:2px dashed var(--accent); outline-offset: 4px}
+    .col-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px}
+    .title{font-weight:700; font-size:16px; letter-spacing:.2px}
+    .title[contenteditable="true"]{outline:1px dashed #2a416e; border-radius:6px; padding:2px 6px}
+    .head-actions{display:flex; gap:6px}
+    .list{display:flex; flex-direction:column; gap:8px; min-height: 8px}
+    .item{
+      display:flex; align-items:center; gap:10px; padding:10px; border:1px solid var(--line); border-radius:12px;
+      background:#0c1530; cursor:grab;
+    }
+    .item:active{cursor:grabbing}
+    .item.drag-over{outline:2px dashed var(--accent); outline-offset: 3px}
+    .favicon{width:18px; height:18px; border-radius:4px; background:#1f2b49; display:inline-block; overflow:hidden; flex: 0 0 auto}
+    .name{font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .url{font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .grow{flex:1; min-width:10px}
+    .i-btn{
+      border:1px solid var(--line); background:#0b1426; color:var(--muted);
+      padding:6px 8px; border-radius:8px; cursor:pointer; font-size:12px;
+    }
+    .i-btn:hover{color:var(--fg); border-color:#2d3d60}
+    .add-item{width:100%; justify-content:center; display:flex; gap:8px; margin-top:8px}
+    .ghost-tip{font-size:12px; color:var(--muted)}
+    footer{padding:18px; text-align:center; color:var(--muted)}
+    .toolbar{display:flex; flex-wrap:wrap; gap:8px}
+    .handle{font-size:16px; opacity:.6; cursor:grab; padding:2px 6px; border:1px dashed var(--line); border-radius:6px}
+    .hidden{display:none !important}
+    .pill{padding:4px 8px; border:1px solid var(--line); border-radius:999px; color:var(--muted); font-size:12px}
+    @media (max-width:640px){
+      .g-logo{font-size:32px}
+      form.search input[type="text"]{font-size:16px}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="left">
+      <div class="logo">GINO<b>首頁</b></div>
+      <span class="pill">拖曳排序＋本機自動儲存</span>
+    </div>
+    <div class="right">
+      <label class="switch">
+        <input id="editToggle" type="checkbox">
+        <span>編輯模式</span>
+      </label>
+      <div class="toolbar">
+        <button class="btn good" id="addColBtn">＋ 新增欄位</button>
+        <button class="btn" id="exportBtn">匯出 JSON</button>
+        <button class="btn" id="importBtn">匯入 JSON</button>
+        <button class="btn danger" id="resetBtn">全部重置</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="search-wrap">
+      <div class="g-logo" aria-label="Google 標誌" title="Google">
+        <span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
+      </div>
+      <form class="search" action="https://www.google.com/search" method="GET" target="_blank" role="search">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.2-4.2M10.8 18.4a7.6 7.6 0 1 1 0-15.2 7.6 7.6 0 0 1 0 15.2z" stroke="#8ea3c3" stroke-width="2" stroke-linecap="round"/></svg>
+        <input type="text" name="q" placeholder="Google 搜尋（按 Enter）" autocomplete="on" autofocus/>
+        <span class="kbd">/</span>
+      </form>
+      <div class="ghost-tip">提示：按 <span class="kbd">/</span> 可快速聚焦搜尋列</div>
+    </section>
+
+    <section class="grid" id="grid" aria-live="polite" aria-label="分欄捷徑區"></section>
+  </main>
+
+  <footer>© <span id="year"></span> 我的可分欄 Google 首頁 — 本頁資料僅儲存在你的瀏覽器（localStorage）。</footer>
+
+  <template id="colTpl">
+    <div class="col" draggable="true">
+      <div class="col-head">
+        <div class="left">
+          <span class="handle" title="拖曳欄位排序">☰</span>
+          <div class="title" contenteditable="false" spellcheck="false">未命名欄位</div>
+        </div>
+        <div class="head-actions">
+          <button class="i-btn addLinkBtn hidden">＋ 新增網站</button>
+          <button class="i-btn delColBtn hidden">刪欄</button>
+        </div>
+      </div>
+      <div class="list"></div>
+      <div class="add-item hidden">
+        <button class="i-btn addLinkBtn2">＋ 新增網站</button>
+      </div>
+    </div>
+  </template>
+
+  <template id="itemTpl">
+    <div class="item" draggable="true">
+      <div class="favicon" aria-hidden="true"></div>
+      <div class="grow">
+        <div class="name">未命名</div>
+        <div class="url">https://example.com</div>
+      </div>
+      <div class="row-actions hidden">
+        <button class="i-btn editBtn">編輯</button>
+        <button class="i-btn delBtn">刪除</button>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    const KEY = "gino_google_home_columns_v1";
+    const grid = document.getElementById('grid');
+    const colTpl = document.getElementById('colTpl');
+    const itemTpl = document.getElementById('itemTpl');
+    const toggle = document.getElementById('editToggle');
+    const addColBtn = document.getElementById('addColBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const yearEl = document.getElementById('year'); yearEl.textContent = new Date().getFullYear();
+
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+    // ------- Data layer -------
+    function load(){
+      try{
+        const raw = localStorage.getItem(KEY);
+        if(!raw){ return null; }
+        return JSON.parse(raw);
+      }catch(e){
+        console.warn("讀取失敗，將重置", e);
+        return null;
+      }
+    }
+    function save(state){
+      localStorage.setItem(KEY, JSON.stringify(state));
+    }
+    function getState(){
+      const cols = $$('.col', grid).map(col => ({
+        title: $('.title', col).textContent.trim() || '未命名欄位',
+        items: $$('.item', col).map(it => ({
+          name: $('.name', it).textContent.trim() || '未命名',
+          url: $('.url', it).textContent.trim() || ''
+        }))
+      }));
+      return { cols };
+    }
+
+    // ------- UI builders -------
+    function makeCol(data){
+      const col = colTpl.content.firstElementChild.cloneNode(true);
+      $('.title', col).textContent = data.title || '未命名欄位';
+      const list = $('.list', col);
+      (data.items||[]).forEach(d => list.appendChild(makeItem(d)));
+      wireCol(col);
+      return col;
+    }
+    function makeItem(d){
+      const item = itemTpl.content.firstElementChild.cloneNode(true);
+      $('.name', item).textContent = d.name || '未命名';
+      $('.url', item).textContent = d.url || '';
+      setFavicon(item, d.url);
+      wireItem(item);
+      return item;
+    }
+    function setFavicon(item, url){
+      const host = safeHost(url);
+      const iconUrl = host ? `https://www.google.com/s2/favicons?sz=32&domain_url=${encodeURIComponent(host)}` : '';
+      const box = $('.favicon', item);
+      box.innerHTML = iconUrl ? `<img src="${iconUrl}" alt="" width="18" height="18" loading="lazy">` : '';
+    }
+    function safeHost(url){
+      try{ return new URL(url).origin; }catch{ return ""; }
+    }
+
+    // ------- Interactions -------
+    function wireCol(col){
+      const title = $('.title', col);
+      const addLinkBtn = $('.addLinkBtn', col);
+      const addLinkBtn2 = $('.addLinkBtn2', col);
+      const delColBtn = $('.delColBtn', col);
+      const list = $('.list', col);
+
+      // open link when click item (view mode), or select when edit mode
+      list.addEventListener('click', e=>{
+        const it = e.target.closest('.item');
+        if(!it) return;
+        if(toggle.checked){ // edit mode -> do nothing (select)
+          return;
+        }
+        const url = $('.url', it).textContent.trim();
+        if(url) window.open(url, '_blank');
+      });
+
+      [addLinkBtn, addLinkBtn2].forEach(btn=> btn.addEventListener('click', ()=>{
+        const name = prompt('網站名稱：', '我的最愛');
+        if(name===null) return;
+        const url = prompt('網址 (以 http(s) 開頭)：', 'https://');
+        if(url===null) return;
+        const it = makeItem({name, url});
+        list.appendChild(it);
+        save(getState());
+      }));
+
+      delColBtn.addEventListener('click', ()=>{
+        if(confirm('刪除此欄位？（無法復原）')){
+          col.remove();
+          save(getState());
+        }
+      });
+
+      // Drag column
+      col.addEventListener('dragstart', e=>{
+        if(!toggle.checked){ e.preventDefault(); return; }
+        col.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', 'col');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      col.addEventListener('dragend', ()=>{
+        col.classList.remove('dragging');
+        save(getState());
+      });
+      grid.addEventListener('dragover', e=>{
+        const dragging = $('.col.dragging', grid);
+        if(!dragging) return;
+        e.preventDefault();
+        const after = getColAfter(grid, e.clientY, e.clientX);
+        if(after==null){ grid.appendChild(dragging); }
+        else{ grid.insertBefore(dragging, after); }
+      });
+
+      // Editability
+      function applyEditUI(){
+        const editing = toggle.checked;
+        title.setAttribute('contenteditable', editing ? 'true' : 'false');
+        $$('.row-actions', col).forEach(el=> el.classList.toggle('hidden', !editing));
+        $$('.addLinkBtn, .addLinkBtn2, .delColBtn', col).forEach(el=> el.classList.toggle('hidden', !editing));
+        $('.handle', col).classList.toggle('hidden', !editing);
+        col.setAttribute('draggable', editing ? 'true' : 'false');
+      }
+      title.addEventListener('input', ()=> save(getState()));
+      toggle.addEventListener('change', applyEditUI);
+      applyEditUI();
+    }
+
+    function wireItem(item){
+      const editBtn = $('.editBtn', item);
+      const delBtn = $('.delBtn', item);
+
+      // drag item
+      item.addEventListener('dragstart', e=>{
+        if(!toggle.checked){ e.preventDefault(); return; }
+        item.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', 'item');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      item.addEventListener('dragend', ()=>{
+        item.classList.remove('dragging');
+        save(getState());
+      });
+
+      item.addEventListener('dragover', e=>{
+        const dragging = $('.item.dragging', grid);
+        if(!dragging) return;
+        e.preventDefault();
+        const list = item.parentElement;
+        const rect = item.getBoundingClientRect();
+        const before = (e.clientY - rect.top) < rect.height/2;
+        list.insertBefore(dragging, before ? item : item.nextSibling);
+      });
+
+      // allow dropping into empty list
+      item.parentElement?.addEventListener('dragover', onListDragOver);
+      function onListDragOver(e){
+        const dragging = $('.item.dragging', grid);
+        if(!dragging) return;
+        e.preventDefault();
+        if(e.target.classList.contains('list') && !$('.item', e.target)){
+          e.target.appendChild(dragging);
+        }
+      }
+
+      editBtn.addEventListener('click', ()=>{
+        const name0 = $('.name', item).textContent;
+        const url0 = $('.url', item).textContent;
+        const name = prompt('網站名稱：', name0);
+        if(name===null) return;
+        const url = prompt('網址 (以 http(s) 開頭)：', url0);
+        if(url===null) return;
+        $('.name', item).textContent = name.trim() || '未命名';
+        $('.url', item).textContent = url.trim();
+        setFavicon(item, url.trim());
+        save(getState());
+      });
+      delBtn.addEventListener('click', ()=>{
+        if(confirm('刪除此捷徑？')){
+          item.remove();
+          save(getState());
+        }
+      });
+    }
+
+    function getColAfter(container, y, x){
+      const cards = $$('.col:not(.dragging)', container);
+      let closest = null;
+      let closestDist = Number.NEGATIVE_INFINITY;
+      for(const c of cards){
+        const rect = c.getBoundingClientRect();
+        const offset = y - rect.top - rect.height/2;
+        if(offset < 0 && offset > closestDist){
+          closestDist = offset; closest = c;
+        }
+      }
+      return closest;
+太簡陋，我想製作一個類似這樣的，但是不要黑色背景 
+
+   }
+
+    // Keyboard focus for search
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === '/' && !['INPUT','TEXTAREA'].includes(document.activeElement.tagName)){
+        e.preventDefault();
+        const search = document.querySelector('form.search input[name="q"]');
+        search.focus();
+        search.select();
+      }
+    });
+
+    // top buttons
+    addColBtn.addEventListener('click', ()=>{
+      const col = makeCol({title: '新欄位', items: []});
+      grid.appendChild(col);
+      save(getState());
+      toggle.checked = true; toggle.dispatchEvent(new Event('change'));
+      $('.title', col).focus();
+      document.execCommand?.('selectAll', false, null);
+    });
+
+    exportBtn.addEventListener('click', ()=>{
+      const data = getState();
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'my-google-home.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    importBtn.addEventListener('click', ()=>{
+      const inp = document.createElement('input');
+      inp.type='file'; inp.accept='application/json';
+      inp.onchange = ()=>{
+        const f = inp.files?.[0]; if(!f) return;
+        const r = new FileReader();
+        r.onload = ()=>{
+          try{
+            const state = JSON.parse(r.result);
+            if(!state?.cols) throw new Error('格式不正確');
+            render(state);
+            save(state);
+            alert('匯入完成');
+          }catch(err){
+            alert('匯入失敗：'+err.message);
+          }
+        };
+        r.readAsText(f);
+      };
+      inp.click();
+    });
+
+    resetBtn.addEventListener('click', ()=>{
+      if(confirm('確定要重置？這會清除所有欄位與捷徑。')){
+        localStorage.removeItem(KEY);
+        render(defaultState());
+      }
+    });
+
+    function defaultState(){
+      return {
+        cols: [
+          { title: '工作', items: [
+            {name:'Gmail', url:'https://mail.google.com/'},
+            {name:'Google Drive', url:'https://drive.google.com/'},
+            {name:'Google Calendar', url:'https://calendar.google.com/'},
+          ]},
+          { title: '社群', items: [
+            {name:'Facebook', url:'https://www.facebook.com/'},
+            {name:'Instagram', url:'https://www.instagram.com/'},
+            {name:'YouTube', url:'https://www.youtube.com/'},
+          ]},
+          { title: '學習 / 工具', items: [
+            {name:'ChatGPT', url:'https://chat.openai.com/'},
+            {name:'Notion', url:'https://www.notion.so/'},
+            {name:'GitHub', url:'https://github.com/'},
+          ]}
+        ]
+      };
+    }
+
+    function render(state){
+      grid.innerHTML='';
+      (state?.cols || []).forEach(colData => grid.appendChild(makeCol(colData)));
+      // If nothing, show a helpful empty column
+      if(!grid.children.length){
+        grid.appendChild(makeCol({title:'點右上角「新增欄位」開始', items:[]}));
+      }
+      // Ensure edit toggle refresh
+      $$('.col', grid).forEach(col => {
+        const editing = toggle.checked;
+        $('.title', col).setAttribute('contenteditable', editing ? 'true' : 'false');
+        $$('.row-actions', col).forEach(el=> el.classList.toggle('hidden', !editing));
+        $$('.addLinkBtn, .addLinkBtn2, .delColBtn', col).forEach(el=> el.classList.toggle('hidden', !editing));
+        $('.handle', col).classList.toggle('hidden', !editing);
+        col.setAttribute('draggable', editing ? 'true' : 'false');
+      });
+    }
+
+    // boot
+    const initial = load() || defaultState();
+    render(initial);
+  </script>
+</body>
+</html>
+"""
+with open("/mnt/data/MyCustomGoogleHome.htm", "w", encoding="utf-8") as f:
+    f.write(html_content)
+"/mnt/data/MyCustomGoogleHome.htm"
