@@ -1,63 +1,62 @@
-# Create the updated HTML with "first visit auto-edit mode" enabled
-# Save to /mnt/data/MyCustomGoogleHome_v2.htm
-
-html = r"""<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>我的 Google 首頁｜可分欄捷徑</title>
-  <meta name="color-scheme" content="light dark">
+  <title>我的 Google 首頁｜分欄捷徑（白底）</title>
+  <meta name="robots" content="noindex" />
+  <meta name="color-scheme" content="light">
   <style>
     :root{
-      --bg: #0b1220;
-      --card: #101827;
-      --muted: #93a4bb;
-      --fg: #e8eef7;
-      --line:#22304a;
-      --accent:#3b82f6;
-      --accent-2:#60a5fa;
+      --bg: #f7f9fc;
+      --card: #ffffff;
+      --fg: #0f172a;
+      --muted: #64748b;
+      --line:#e5eaf1;
+      --accent:#2563eb;
+      --accent-2:#3b82f6;
       --danger:#ef4444;
-      --ok:#22c55e;
+      --good:#16a34a;
+      --shadow: 0 6px 24px rgba(15, 23, 42, .06);
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
       font-family: system-ui, -apple-system, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", Arial, sans-serif;
-      background: radial-gradient(1200px 800px at 50% -200px, #1b2a4b 0%, var(--bg) 55%);
+      background: var(--bg);
       color: var(--fg);
-      display:flex;
-      flex-direction:column;
+      display:flex; flex-direction:column;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
     a{color:inherit; text-decoration:none}
     header{
-      padding:16px clamp(12px, 3vw, 28px);
+      padding:14px clamp(12px, 3vw, 28px);
       display:flex; gap:12px; align-items:center; justify-content:space-between;
       border-bottom:1px solid var(--line);
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0));
+      background:#ffffffa6;
       position:sticky; top:0; backdrop-filter: blur(6px);
       z-index:5;
     }
     .left, .right{display:flex; gap:10px; align-items:center}
-    .logo{font-weight:800; letter-spacing: .5px}
+    .logo{font-weight:800; letter-spacing:.2px}
     .logo b{color:var(--accent)}
     .btn{
-      border:1px solid var(--line); background:#0e1729; color:var(--fg);
-      padding:8px 12px; border-radius:10px; cursor:pointer; font-size:14px;
+      border:1px solid var(--line); background:#fff; color:var(--fg);
+      padding:8px 12px; border-radius:10px; cursor:pointer; font-size:14px; box-shadow: var(--shadow);
     }
-    .btn:hover{border-color:#2d3d60}
-    .btn.ghost{background:transparent}
-    .btn.good{border-color: #194a2f; background:#0f2b1d}
-    .btn.danger{border-color:#522222; background:#2a0f11}
+    .btn:hover{border-color:#d7dfe8}
+    .btn.good{border-color:#bfe3cc; background:#f2fbf6}
+    .btn.danger{border-color:#f3c4c4; background:#fff5f5}
     .switch{display:inline-flex; align-items:center; gap:8px; user-select:none}
-    .switch input{appearance:none; width:44px; height:24px; background:#142036; border:1px solid var(--line); border-radius:999px; position:relative; outline:none; cursor:pointer}
-    .switch input:checked{background:#17315f; border-color:#2d4f92}
-    .switch input::after{content:""; position:absolute; width:18px; height:18px; border-radius:50%; left:3px; top:2px; background:#dfe9fb; transition:all .18s}
-    .switch input:checked::after{left:22px; background:#9cc0ff}
+    .switch input{appearance:none; width:44px; height:24px; background:#eef2f8; border:1px solid var(--line); border-radius:999px; position:relative; outline:none; cursor:pointer}
+    .switch input:checked{background:#dce8ff; border-color:#bfd3ff}
+    .switch input::after{content:""; position:absolute; width:18px; height:18px; border-radius:50%; left:3px; top:2px; background:#ffffff; transition:all .18s; box-shadow:0 1px 3px rgba(0,0,0,.15)}
+    .switch input:checked::after{left:22px; background:#ffffff}
     main{padding: max(2vh,16px) clamp(12px, 4vw, 48px); display:flex; flex-direction:column; gap:18px}
     .search-wrap{display:flex; flex-direction:column; align-items:center; margin:6vh auto 2vh auto; width:min(900px, 96%); gap:14px}
-    .g-logo{font-size:42px; font-weight:900; letter-spacing:.6px}
+    .g-logo{font-size:44px; font-weight:900; letter-spacing:.6px}
     .g-logo span:nth-child(1){color:#4285F4}
     .g-logo span:nth-child(2){color:#EA4335}
     .g-logo span:nth-child(3){color:#FBBC05}
@@ -66,60 +65,54 @@ html = r"""<!DOCTYPE html>
     .g-logo span:nth-child(6){color:#EA4335}
     form.search{
       display:flex; align-items:center; gap:10px; width:100%;
-      background: #0b1426; border:1px solid var(--line); border-radius:999px;
-      padding:10px 14px;
-      box-shadow: 0 0 0 3px rgba(59,130,246,.08) inset;
+      background: #fff; border:1px solid #dfe6ef; border-radius:999px;
+      padding:10px 14px; box-shadow: var(--shadow);
     }
     form.search input[type="text"]{
       flex:1; font-size:18px; padding:10px 8px; background:transparent; border:0; outline:none; color:var(--fg);
     }
-    .kbd{font: 12px/1.2 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-         border:1px solid var(--line); padding:2px 6px; border-radius:6px; color:var(--muted)}
+    .kbd{font:12px/1.2 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+         border:1px solid #e3e8f0; padding:2px 6px; border-radius:6px; color:#94a3b8; background:#fff}
     .grid{
-      display:grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap:16px;
-      align-items:start;
+      display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:18px; align-items:start;
     }
     .col{
-      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
-      border:1px solid var(--line); border-radius:14px; padding:12px; position:relative;
+      background: var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; position:relative; box-shadow: var(--shadow);
     }
-    .col.drag-over{outline:2px dashed var(--accent); outline-offset: 4px}
     .col-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px}
     .title{font-weight:700; font-size:16px; letter-spacing:.2px}
-    .title[contenteditable="true"]{outline:1px dashed #2a416e; border-radius:6px; padding:2px 6px}
+    .title[contenteditable="true"]{outline:1px dashed #b9c6d8; border-radius:6px; padding:2px 6px; background:#f8fbff}
     .head-actions{display:flex; gap:6px}
     .list{display:flex; flex-direction:column; gap:8px; min-height: 8px}
     .item{
-      display:flex; align-items:center; gap:10px; padding:10px; border:1px solid var(--line); border-radius:12px;
-      background:#0c1530; cursor:grab;
+      display:flex; align-items:center; gap:10px; padding:10px; border:1px solid #e6ecf4; border-radius:12px;
+      background:#ffffff; cursor:grab; transition: box-shadow .12s ease;
+      box-shadow: 0 2px 8px rgba(15,23,42,.04);
     }
     .item:active{cursor:grabbing}
-    .item.drag-over{outline:2px dashed var(--accent); outline-offset: 3px}
-    .favicon{width:18px; height:18px; border-radius:4px; background:#1f2b49; display:inline-block; overflow:hidden; flex: 0 0 auto}
+    .favicon{width:18px; height:18px; border-radius:4px; background:#eef2f7; display:inline-block; overflow:hidden; flex: 0 0 auto}
     .name{font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
     .url{font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
     .grow{flex:1; min-width:10px}
     .i-btn{
-      border:1px solid var(--line); background:#0b1426; color:var(--muted);
+      border:1px solid #e6ecf4; background:#fff; color:#475569;
       padding:6px 8px; border-radius:8px; cursor:pointer; font-size:12px;
     }
-    .i-btn:hover{color:var(--fg); border-color:#2d3d60}
+    .i-btn:hover{color:#111827; border-color:#d7dfe8}
     .add-item{width:100%; justify-content:center; display:flex; gap:8px; margin-top:8px}
-    .ghost-tip{font-size:12px; color:var(--muted)}
-    footer{padding:18px; text-align:center; color:var(--muted)}
+    .ghost-tip{font-size:12px; color:#94a3b8}
+    footer{padding:18px; text-align:center; color:#94a3b8}
     .toolbar{display:flex; flex-wrap:wrap; gap:8px}
-    .handle{font-size:16px; opacity:.6; cursor:grab; padding:2px 6px; border:1px dashed var(--line); border-radius:6px}
+    .handle{font-size:16px; opacity:.6; cursor:grab; padding:2px 6px; border:1px dashed #cbd5e1; border-radius:6px; color:#64748b}
     .hidden{display:none !important}
-    .pill{padding:4px 8px; border:1px solid var(--line); border-radius:999px; color:var(--muted); font-size:12px}
+    .pill{padding:4px 8px; border:1px solid var(--line); border-radius:999px; color:#64748b; font-size:12px; background:#fff}
     .banner{
-      margin: 8px 0 -8px 0; padding:10px 12px; border:1px dashed #2a416e; border-radius:10px; color:#9fb6e6; font-size:13px;
+      margin: 8px 0 -8px 0; padding:10px 12px; border:1px dashed #bfd3ff; border-radius:10px; color:#365ba7; background:#f3f7ff; font-size:13px;
       display:none;
     }
     .banner.show{display:block}
     @media (max-width:640px){
-      .g-logo{font-size:32px}
+      .g-logo{font-size:34px}
       form.search input[type="text"]{font-size:16px}
     }
   </style>
@@ -150,7 +143,7 @@ html = r"""<!DOCTYPE html>
         <span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
       </div>
       <form class="search" action="https://www.google.com/search" method="GET" target="_blank" role="search">
-        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.2-4.2M10.8 18.4a7.6 7.6 0 1 1 0-15.2 7.6 7.6 0 0 1 0 15.2z" stroke="#8ea3c3" stroke-width="2" stroke-linecap="round"/></svg>
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.2-4.2M10.8 18.4a7.6 7.6 0 1 1 0-15.2 7.6 7.6 0 0 1 0 15.2z" stroke="#9aa7b9" stroke-width="2" stroke-linecap="round"/></svg>
         <input type="text" name="q" placeholder="Google 搜尋（按 Enter）" autocomplete="on" autofocus/>
         <span class="kbd">/</span>
       </form>
@@ -272,13 +265,10 @@ html = r"""<!DOCTYPE html>
       const delColBtn = $('.delColBtn', col);
       const list = $('.list', col);
 
-      // open link when click item (view mode), or select when edit mode
       list.addEventListener('click', e=>{
         const it = e.target.closest('.item');
         if(!it) return;
-        if(toggle.checked){ // edit mode -> do nothing (select)
-          return;
-        }
+        if(toggle.checked){ return; }
         const url = $('.url', it).textContent.trim();
         if(url) window.open(url, '_blank');
       });
@@ -320,7 +310,6 @@ html = r"""<!DOCTYPE html>
         else{ grid.insertBefore(dragging, after); }
       });
 
-      // Editability
       function applyEditUI(){
         const editing = toggle.checked;
         title.setAttribute('contenteditable', editing ? 'true' : 'false');
@@ -338,7 +327,6 @@ html = r"""<!DOCTYPE html>
       const editBtn = $('.editBtn', item);
       const delBtn = $('.delBtn', item);
 
-      // drag item
       item.addEventListener('dragstart', e=>{
         if(!toggle.checked){ e.preventDefault(); return; }
         item.classList.add('dragging');
@@ -360,7 +348,6 @@ html = r"""<!DOCTYPE html>
         list.insertBefore(dragging, before ? item : item.nextSibling);
       });
 
-      // allow dropping into empty list
       item.parentElement?.addEventListener('dragover', onListDragOver);
       function onListDragOver(e){
         const dragging = $('.item.dragging', grid);
@@ -405,7 +392,6 @@ html = r"""<!DOCTYPE html>
       return closest;
     }
 
-    // Keyboard focus for search
     document.addEventListener('keydown', (e)=>{
       if(e.key === '/' && !['INPUT','TEXTAREA'].includes(document.activeElement.tagName)){
         e.preventDefault();
@@ -415,7 +401,6 @@ html = r"""<!DOCTYPE html>
       }
     });
 
-    // top buttons
     addColBtn.addEventListener('click', ()=>{
       const col = makeCol({title: '新欄位', items: []});
       grid.appendChild(col);
@@ -461,7 +446,6 @@ html = r"""<!DOCTYPE html>
       if(confirm('確定要重置？這會清除所有欄位與捷徑。')){
         localStorage.removeItem(KEY);
         render(defaultState());
-        // 重置後自動進入編輯
         toggle.checked = true; toggle.dispatchEvent(new Event('change'));
       }
     });
@@ -491,11 +475,9 @@ html = r"""<!DOCTYPE html>
     function render(state){
       grid.innerHTML='';
       (state?.cols || []).forEach(colData => grid.appendChild(makeCol(colData)));
-      // If nothing, show a helpful empty column
       if(!grid.children.length){
         grid.appendChild(makeCol({title:'點右上角「新增欄位」開始', items:[]}));
       }
-      // Ensure edit toggle refresh
       $$('.col', grid).forEach(col => {
         const editing = toggle.checked;
         $('.title', col).setAttribute('contenteditable', editing ? 'true' : 'false');
@@ -519,8 +501,3 @@ html = r"""<!DOCTYPE html>
   </script>
 </body>
 </html>
-"""
-with open("/mnt/data/MyCustomGoogleHome_v2.htm", "w", encoding="utf-8") as f:
-    f.write(html)
-
-"/mnt/data/MyCustomGoogleHome_v2.htm"
